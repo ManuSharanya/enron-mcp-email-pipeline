@@ -20,10 +20,9 @@ enron_emails.db
 enron_emails.db-shm
 enron_emails.db-wal
 
-# ── Pipeline outputs (generated — reviewers can regenerate) ──────────────────
-output/
-error_log.txt
-duplicates_report.csv
+# ── Pipeline outputs (keep generated outputs for submission) ─────────────────
+# output/replies/ and output/send_log.csv are required by the spec — tracked
+# duplicates_report.csv and error_log.txt are required by the spec — tracked
 
 # ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
