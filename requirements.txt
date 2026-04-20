@@ -1,0 +1,29 @@
+# ── Core email parsing ────────────────────────────────────────────────────────
+chardet>=5.2.0          # Encoding detection for raw email bytes
+
+# ── Fuzzy / similarity matching ───────────────────────────────────────────────
+rapidfuzz>=3.6.0        # Fast fuzzy string matching for duplicate detection (Task 3)
+
+# ── Database ──────────────────────────────────────────────────────────────────
+# sqlite3 is part of the Python standard library (no extra install needed)
+
+# ── Date / timezone handling ──────────────────────────────────────────────────
+python-dateutil>=2.9.0  # Robust date parsing for varied email date formats
+pytz>=2024.1            # Timezone conversions (PST, EST, CDT, etc. → UTC)
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+python-dotenv>=1.0.0    # Loads .env into os.environ at startup (main.py)
+
+# ── MCP / Gmail integration (Task 4) ─────────────────────────────────────────
+anthropic>=0.40.0       # Anthropic SDK — Claude API client for the agentic loop
+mcp>=1.0.0              # MCP client SDK — connects to the Gmail MCP server via stdio
+# The Gmail MCP server itself is a Node.js package (no pip install needed):
+#   npm install -g @gongrzhe/server-gmail-autoauth-mcp
+# Authenticate once with:
+#   npx @gongrzhe/server-gmail-autoauth-mcp auth
+
+# ── CSV / reporting ───────────────────────────────────────────────────────────
+# csv and logging are part of the Python standard library
+
+# ── Dev / testing (optional) ─────────────────────────────────────────────────
+pytest>=8.0.0           # Unit tests

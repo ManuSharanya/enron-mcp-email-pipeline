@@ -1,0 +1,10 @@
+{
+  "_comment": "Copy this file to mcp_config.json. No secret values needed — OAuth token is stored by the MCP server automatically after running: npx @gongrzhe/server-gmail-autoauth-mcp auth",
+  "mcpServers": {
+    "gmail": {
+      "command": "npx",
+      "args": ["@gongrzhe/server-gmail-autoauth-mcp"],
+      "env": {}
+    }
+  }
+}
