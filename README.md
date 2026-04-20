@@ -160,6 +160,7 @@ npx @gongrzhe/server-gmail-autoauth-mcp
 
 ## Architecture Overview
 
+```
 maildir files (5 mailboxes)
 │
 ▼
@@ -179,10 +180,11 @@ notifier.py
 ├── Dry-run ──► output/replies/*.eml
 │
 └── Live ──► Claude API (Anthropic SDK)
-│
-▼
-Gmail MCP Server
-(send_email tool)
-│
-▼
-Gmail Inbox
+              │
+              ▼
+         Gmail MCP Server
+         (send_email tool)
+              │
+              ▼
+         Gmail Inbox
+```
