@@ -60,14 +60,14 @@ The MCP integration in notifier.py is the most complex part of the pipeline — 
 
 ## Iterations & Debugging
 
-### Case 1 — Task 3: Pipeline kept hanging for over an hour
+### Case 1 - Task 3: Pipeline kept hanging for over an hour
 
 **Issue:** The initial approach ran pairwise fuzzy comparisons (fuzz.ratio) across all candidate email groups. This sounds fine until I looked at the actual data. kean-s had a newsletter group called "Energy Issues" with 293 emails — that's 293×292/2 = ~42,000 comparisons for one group alone. The process ran for over an hour and had to be killed multiple times.
 **refining the prompt:** I stopped the run and asked Claude to diagnose which groups were causing the slowdown before touching any code. Once the newsletter groups were identified, I prompted *"which email box is the most problematic?"* to identify the bottleneck, then asked *"instead of running all comparisons, what if we use hashing to group exact duplicates first?"* to propose the hash-first approach. Once confirmed, I followed up with *"should I also replace any mailbox for demonstration purposes? we need to mainly demonstrate the duplicate mail sending pipeline"* — replacing kean-s with skilling-j was the cleaner fix.
 
 **Fix:** Switched to a hash-first approach. SHA-256 hash the normalised body first — emails with identical bodies collapse instantly to a single representative. Then fuzzy matching only runs between representatives, not all 293 members. A 293-email newsletter group with mostly identical bodies reduced to 1-3 comparisons. Also replaced kean-s with skilling-j to remove the problematic newsletter group entirely. 
 
-### Case 2 — MCP server: two wrong servers installed before the right one
+### Case 2 - MCP server: two wrong servers installed before the right one
 
 **Issue:** First tried `mcp-gmail` (a Python package) — failed immediately on import with `TypeError: Too few arguments for typing.Dict`. This is a known incompatibility with Python 3.14's stricter type checking, not something fixable without patching the upstream library.
 
@@ -75,7 +75,7 @@ Switched to the GongRzhe Node.js server (`@gongrzhe/server-gmail-mcp`), which st
 
 **Fix:** Uninstalled the stateless variant, installed the correct autoauth package, added Gmail address as a test user in Google Cloud Console under OAuth consent screen -> Test users.
 
-### Case 3 — False positives in duplicate notifications
+### Case 3 - False positives in duplicate notifications
 
 **What went wrong:** After the first successful live run, some emails showed similarity scores of 66.9% and 84.7% in the notifications — well below the 90% threshold. When I found this and checked, the explanation was Union-Find transitivity: if A~B (≥90%) and B~C (≥90%), Union-Find puts A, B, C in the same cluster even if A~C only scores 66.9%.
 
@@ -171,10 +171,10 @@ Screenshot 2 — Example notification email (100% similarity score — exact dup
 
 ## Lessons Learned
 
-The biggest thing: ask "what are the tradeoffs?" before accepting a design. The truncation approach for Task 3 sounded reasonable until I asked — then it was obvious it could miss duplicates and flag false positives. That one question saved a lot of rework.
+The biggest thing: ask "what are the tradeoffs?" before accepting a design. The truncation approach for Task 3 sounded reasonable until I asked - then it was obvious it could miss duplicates and flag false positives. That one question saved a lot of rework.
 
-MCP setup is entirely manual and takes longer than expected. Claude can walk you through the steps, but creating a Google Cloud project, enabling APIs, setting up OAuth credentials, and adding test users all require clicking through GCP console yourself. Budget more time for this part than you think.
+MCP setup is entirely manual and takes longer than expected. Claude can walk us through the steps, but creating a Google Cloud project, enabling APIs, setting up OAuth credentials, and adding test users all require some time. 
 
-The agentic loop (Claude → tool_use → MCP → tool_result → Claude) is simpler than it sounds once you see it working end-to-end. But understanding what MCP actually is, what OAuth does, and how the loop flows — before touching any code — made it much easier to debug when the server started in stateless mode instead of doing the auth flow.
+The agentic loop (Claude -> tool_use -> MCP -> tool_result -> Claude) is simpler than it sounds once we see it working end-to-end. But understanding what MCP actually is, what OAuth does, and how the loop flows - before touching any code - made it much easier to debug when the server started in stateless mode instead of doing the auth flow.
 
-AI is very good at structure and boilerplate. Where it needed more guidance was in edge cases specific to this dataset — the Windows trailing-dot filename issue in the Enron maildir, the newsletter group bottleneck, the Union-Find transitivity false positives. Those all required either catching the problem myself or knowing the right question to ask.
+AI is very good at structure and template. Where it needed more guidance was in edge cases specific to this dataset - the Windows trailing-dot filename issue in the Enron maildir, the newsletter group bottleneck, the Union-Find transitivity false positives. Those all required either catching the problem myself and fixing or knowing the right question to ask.
