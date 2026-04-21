@@ -13,7 +13,7 @@
 
 I gave Claude the full spec at the start, then worked task by task. For each task I'd paste the relevant spec section and ask for a plan before any code was written. This helped because Claude would catch spec details I might have glossed over if I just described the task in my own words.
 
-One habit I developed early: before accepting any design decision, I'd ask "what are the tradeoffs?" or push back on the first approach. This saved significant rework — the Task 3 approach changed completely because I questioned it before implementation.
+One habit I developed early: before accepting any design decision, I'd ask "what are the tradeoffs?" or push back on the first approach. This saved significant rework; the Task 3 approach changed completely because I questioned it before implementation.
 
 exact prompt I gave at the beginning:
 
@@ -44,17 +44,17 @@ Rather than summarising what I wanted, I pasted the exact spec text and asked Cl
 **2. Questioning a design decision before coding**
 > "but will truncating the body context maintain integrity? what are the tradeoffs?"
 
-Claude's first approach for duplicate detection was to truncate email bodies to 2000 characters before fuzzy matching. I pushed back before any code was written. The answer revealed that truncation could cause false positives for emails where the meaningful content comes after the cutoff — so we switched approaches entirely.
+Claude's first approach for duplicate detection was to truncate email bodies to 2000 characters before fuzzy matching. I pushed back before any code was written. The answer revealed that truncation could cause false positives for emails where the meaningful content comes after the cutoff so we switched approaches entirely.
 
 **3. Guiding a fix when something wasn't working**
-> "Instead of continuing down this path, could we use some kind of hashing technique — or should we replace the mailbox? Our main goal is to demonstrate the duplicate mail-sending pipeline"
+> "Instead of continuing this, could we use some kind of hashing technique - or should we replace the mailbox? Our main goal is to demonstrate the duplicate mail-sending pipeline"
 
 Task 3 was hanging. Rather than keep patching the same approach, I stepped back and proposed two changes at once: switch to a hashing + fuzzy matching strategy for detecting duplicates, and replace the problematic mailbox. Both turned out to be necessary as kean-s belonged to a massive newsletter group that was overwhelming the pipeline, so swapping it out with skilling-j removed the bottleneck, while the hashing + fuzzy approach handled the duplicate detection more efficiently. Together, the two changes fixed the task cleanly.
 
 **4. Asking for readable code**
 > "okay, comment it well so I can understand the flow. notify me after it is completed"
 
-The MCP integration in notifier.py is the most complex part of the pipeline — Claude calling a tool, getting a result, confirming success. I asked for clear inline comments throughout so I could follow what was happening at each step.
+The MCP integration in notifier.py is the most complex part of the pipeline - Claude calling a tool, getting a result, confirming success. I asked for clear inline comments throughout so I could follow what was happening at each step.
 
 ---
 
@@ -62,10 +62,10 @@ The MCP integration in notifier.py is the most complex part of the pipeline — 
 
 ### Case 1 - Task 3: Pipeline kept hanging for over an hour
 
-**Issue:** The initial approach ran pairwise fuzzy comparisons (fuzz.ratio) across all candidate email groups. This sounds fine until I looked at the actual data. kean-s had a newsletter group called "Energy Issues" with 293 emails — that's 293×292/2 = ~42,000 comparisons for one group alone. The process ran for over an hour and had to be killed multiple times.
-**refining the prompt:** I stopped the run and asked Claude to diagnose which groups were causing the slowdown before touching any code. Once the newsletter groups were identified, I prompted *"which email box is the most problematic?"* to identify the bottleneck, then asked *"instead of running all comparisons, what if we use hashing to group exact duplicates first?"* to propose the hash-first approach. Once confirmed, I followed up with *"should I also replace any mailbox for demonstration purposes? we need to mainly demonstrate the duplicate mail sending pipeline"* — replacing kean-s with skilling-j was the cleaner fix.
+**Issue:** The initial approach ran pairwise fuzzy comparisons (fuzz.ratio) across all candidate email groups. This sounds fine until I looked at the actual data. kean-s had a newsletter group called "Energy Issues" with 293 emails — that's 293×292/2 = 42,000 comparisons for one group alone. The process ran for over an hour and had to be killed multiple times.
+**refining the prompt:** I stopped the run and asked Claude to diagnose which groups were causing the slowdown before touching any code. Once the newsletter groups were identified, I prompted *"which email box is the most problematic?"* to identify the bottleneck, then asked *"instead of running all comparisons, what if we use hashing to group exact duplicates first?"* to propose the hash-first approach. Once confirmed, I followed up with *"Instead of continuing this, could we use some kind of hashing technique - or should we replace the mailbox? Our main goal is to demonstrate the duplicate mail-sending pipeline"* .
 
-**Fix:** Switched to a hash-first approach. SHA-256 hash the normalised body first — emails with identical bodies collapse instantly to a single representative. Then fuzzy matching only runs between representatives, not all 293 members. A 293-email newsletter group with mostly identical bodies reduced to 1-3 comparisons. Also replaced kean-s with skilling-j to remove the problematic newsletter group entirely. 
+**Fix:** Switched to a hash-first approach. SHA-256 hash the normalised body first. Emails with identical bodies collapse instantly to a single representative. Then fuzzy matching only runs between representatives, not all 293 members. A 293-email newsletter group with mostly identical bodies reduced to 1-3 comparisons. Also replaced kean-s with skilling-j to remove the problematic newsletter group entirely. 
 
 ### Case 2 - MCP server: two wrong servers installed before the right one
 
@@ -77,13 +77,13 @@ Switched to the GongRzhe Node.js server (`@gongrzhe/server-gmail-mcp`), which st
 
 ### Case 3 - False positives in duplicate notifications
 
-**What went wrong:** After the first successful live run, some emails showed similarity scores of 66.9% and 84.7% in the notifications — well below the 90% threshold. When I found this and checked, the explanation was Union-Find transitivity: if A~B (≥90%) and B~C (≥90%), Union-Find puts A, B, C in the same cluster even if A~C only scores 66.9%.
+**What went wrong:** After the first successful live run, some emails showed similarity scores of 66.9% and 84.7% in the notifications which were well below the 90% threshold. When I found this and checked, the explanation was Union-Find transitivity: if A~B (≥90%) and B~C (≥90%), Union-Find puts A, B, C in the same cluster even if A~C only scores 66.9%.
 
-That's not a duplicate under the spec's own definition — the spec says "body similarity ≥ 90%". A 66.9% score against the original is too ambiguous to flag with confidence.
+That's not a duplicate under the given definition. The given document says "body similarity ≥ 90%". A 66.9% score against the original is too ambiguous to flag with confidence.
 
-**Refining prompt:** I flagged the specific email and score to Claude and asked directly: *"why is this a duplicate when score is 66%? what is the expected output?"* This forced a clear answer — it confirmed the email should not be flagged, explained why Union-Find caused it, and proposed the strict pairwise filter as a fix.
+**Refining prompt:** I flagged the specific email and score to Claude and asked directly: *"why is this a duplicate when score is 66%? what is the expected output?"* This forced a clear answer. It confirmed the email should not be flagged, explained why Union-Find caused it, and proposed the strict pairwise filter as a fix.
 
-**Fix:** Added a strict pairwise filter — after clustering, any email whose direct score against the original is below 90% gets dropped, even if Union-Find pulled it into the cluster via a chain. Also added a DB clear step at the start of Task 3 so old stale flags don't persist across re-runs.
+**Fix:** Added a strict pairwise filter - after clustering, any email whose direct score against the original is below 90% gets dropped, even if Union-Find pulled it into the cluster via a chain. Also added a DB clear step at the start of Task 3 so old stale flags don't persist across re-runs.
 
 ---
 
