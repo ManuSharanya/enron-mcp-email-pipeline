@@ -87,9 +87,9 @@ The bug was in `utils/email_parser.py`. The X-* headers (X-From, X-To, X-cc, X-b
 
 ### Case 4 - False positives in duplicate notifications
 
-**What went wrong:** After the first successful live run, some emails showed similarity scores of 66.9% and 84.7% in the notifications which were well below the 90% threshold. When I found this and checked, the explanation was Union-Find transitivity: if A~B (≥90%) and B~C (≥90%), Union-Find puts A, B, C in the same cluster even if A~C only scores 66.9%.
+**What went wrong:** After the first successful live run, some emails showed similarity scores of 66.9% and 84.7% in the notifications which were well below the 90% threshold. When I found this and checked, the explanation was Union-Find transitivity: if A~B (>=90%) and B~C (≥90%), Union-Find puts A, B, C in the same cluster even if A~C only scores 66.9%.
 
-That's not a duplicate under the given definition. The given document says "body similarity ≥ 90%". A 66.9% score against the original is too ambiguous to flag with confidence.
+That's not a duplicate under the given definition. The given document says "body similarity >= 90%". A 66.9% score against the original is too ambiguous to flag with confidence.
 
 **Refining prompt:** I flagged the specific email and score to Claude and asked directly: *"why is this a duplicate when score is 66%? what is the expected output?"* This forced a clear answer. It confirmed the email should not be flagged, explained why Union-Find caused it, and proposed the strict pairwise filter as a fix.
 
@@ -123,10 +123,10 @@ That's not a duplicate under the given definition. The given document says "body
 
 ### MCP Server Choice
 
-Used `@gongrzhe/server-gmail-autoauth-mcp` — a Node.js Gmail MCP server. Chose it because:
+Used `@gongrzhe/server-gmail-autoauth-mcp` - a Node.js Gmail MCP server. Chose it because:
 
 - The Python alternative (`mcp-gmail`) was incompatible with Python 3.14 on import
-- The autoauth variant handles token storage automatically after a one-time browser-based auth — no manual token management needed on every run
+- The autoauth variant handles token storage automatically after a one-time browser-based auth - no manual token management needed on every run
 - It exposes a `send_email` tool that Claude can call directly, which is exactly what the spec asks for
 
 ### Step-by-Step Setup
@@ -161,19 +161,19 @@ Claude responds with a `tool_use` block. The pipeline executes that tool call on
 |---|---|
 | `mcp-gmail` TypeError on Python 3.14 | Switched to Node.js-based `@gongrzhe/server-gmail-autoauth-mcp` |
 | Installed stateless variant by mistake | Uninstalled `@gongrzhe/server-gmail-mcp`, installed correct autoauth variant |
-| OAuth "Access blocked" error | Added Gmail address as test user in Google Cloud Console → OAuth consent screen |
+| OAuth "Access blocked" error | Added Gmail address as test user in Google Cloud Console -> OAuth consent screen |
 | Enron sender addresses are defunct | Added `NOTIFICATION_OVERRIDE_EMAIL` env var to redirect all notifications to own Gmail |
 | False positive emails (66.9% score) flagged and notified due to transient connections in union find| Added strict pairwise filter in deduplicator — only emails scoring ≥90% directly against original are flagged |
 
 ### Evidence of Successful Send
 
-Live mode confirmed working — 15 notification emails arrived in Gmail inbox with correct subjects, message IDs, dates, and similarity scores matching the duplicates_report.csv entries.
+Live mode confirmed working - 15 notification emails arrived in Gmail inbox with correct subjects, message IDs, dates, and similarity scores matching the duplicates_report.csv entries.
 
-Screenshot 1 — Gmail inbox showing 15 [Duplicate Notice] emails received:
+Screenshot 1 - Gmail inbox showing 15 [Duplicate Notice] emails received:
 
 ![Gmail inbox with 15 duplicate notices](assets/gmail_inbox_15_notifications.png)
 
-Screenshot 2 — Example notification email (100% similarity score — exact duplicate):
+Screenshot 2 - Example notification email:
 
 ![Duplicate notice email showing 100% similarity](assets/example_notification_email.png)
 
