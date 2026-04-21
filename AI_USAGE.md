@@ -37,9 +37,9 @@ Also verify if the selected 5 mailboxes is a good selection or not.
 ### Example Prompts
 
 **1. Planning Task 4 from the spec**
-> "re read this and layout a plan for task 4" *(pasted the full spec section 4 text)*
+> " *(pasted the full spec section 4 text)* re read this and layout a plan for task 4 and ask me clarifying questions instead of assuming. Do not hallucinate" 
 
-Rather than summarising what I wanted, I pasted the exact spec text and asked Claude to re-read it. This way the plan came from the actual requirements, not my paraphrasing of them.
+Rather than summarising what I wanted, I pasted the exact spec text and asked Claude to re-read it and layout a plan by asking clarifying questions. This way the plan came from the actual requirements, not my paraphrasing.
 
 **2. Questioning a design decision before coding**
 > "but will truncating the body context maintain integrity? what are the tradeoffs?"
@@ -47,9 +47,9 @@ Rather than summarising what I wanted, I pasted the exact spec text and asked Cl
 Claude's first approach for duplicate detection was to truncate email bodies to 2000 characters before fuzzy matching. I pushed back before any code was written. The answer revealed that truncation could cause false positives for emails where the meaningful content comes after the cutoff — so we switched approaches entirely.
 
 **3. Guiding a fix when something wasn't working**
-> "instead of this, should I replace any mailbox? because we need to mainly demonstrate the duplicate mail sending pipeline"
+> "Instead of continuing down this path, could we use some kind of hashing technique — or should we replace the mailbox? Our main goal is to demonstrate the duplicate mail-sending pipeline"
 
-Task 3 was hanging. Instead of patching the algorithm further, I asked whether swapping out the problematic mailbox made more sense. It did — kean-s had a massive newsletter group driving the bottleneck, and replacing it with skilling-j fixed the problem cleanly.
+Task 3 was hanging. Rather than keep patching the same approach, I stepped back and proposed two changes at once: switch to a hashing + fuzzy matching strategy for detecting duplicates, and replace the problematic mailbox. Both turned out to be necessary as kean-s belonged to a massive newsletter group that was overwhelming the pipeline, so swapping it out with skilling-j removed the bottleneck, while the hashing + fuzzy approach handled the duplicate detection more efficiently. Together, the two changes fixed the task cleanly.
 
 **4. Asking for readable code**
 > "okay, comment it well so I can understand the flow. notify me after it is completed"
