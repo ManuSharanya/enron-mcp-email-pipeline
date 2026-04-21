@@ -5,7 +5,7 @@
 
 -- Query 1: Top 10 senders by email volume
 -- Expected output: 10 rows showing email addresses and their send counts.
--- Top senders are mostly from the selected mailboxes (kaminski-v, dasovich-j, taylor-m).
+-- Top senders are mostly from the selected mailboxes (taylor-m, haedicke-m, skilling-j).
 
 SELECT
     from_address,

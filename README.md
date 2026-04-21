@@ -36,17 +36,19 @@ a Gmail MCP server.
 
 ## Selected Mailboxes
 
-| **Total Emails**     | **~76,545** |                                                |
+| **Total Emails**     | **25,065** |                                                |
 
-Kaminski-v (Email count: 27,759): High-volume mailbox covering quantitative modelling, risk analysis, and academic research correspondence. Selected for dataset richness and volume (more duplicates).
+These mailboxes are primarly selected for live demo purposes:
 
-dasovich-j (Email count: 27,502): High-volume mailbox covering government affairs, regulatory filings, and policy discussions. Selected for topical diversity. More chances of duplicates.
+taylor-m (Email count: 13,875): Legal counsel mailbox — contract reviews, compliance, and general counsel correspondence. Largest mailbox in this set and the anchor for duplicate detection since legal emails get heavily forwarded across the team.
 
-skilling-j (Email count: 3,161): CEO-level executive communications covering strategic decisions and company-wide directives. Replaced kean-s as it contained a large recurring newsletter group that caused significant performance bottlenecks during duplicate detection, making it unsuitable for demonstrating the deduplication pipeline cleanly.
+haedicke-m (Email count: 5,246): Senior legal management. Selected alongside taylor-m because these two mailboxes overlap heavily — the same emails get CC'd and forwarded between legal counsel and legal management, which produces a strong duplicate signal.This is reflected in the optional field completeness: cc_addresses populated at 31.9% and forwarded_content at 33.1% across the dataset, both driven largely by these two legal mailboxes.
 
-taylor-m (Email count: 13,346): Mid-volume mailbox covering legal counsel, contract reviews, and compliance communications. Selected for functional diversity.
+skilling-j (Email count: 4,139): CEO communications — strategic decisions, company-wide directives, and executive correspondence. Adds cross-functional diversity and bridges the legal and trading mailboxes.
 
-haedicke-m (Email count: 4,777): Senior legal management covering compliance directives and contract oversight. Selected alongside taylor-m to maximise duplicate detection coverage — legal emails are heavily forwarded and CC'd across counsel, making them ideal candidates for demonstrating the deduplication pipeline.
+buy-r (Email count: 2,429): Energy trading. Selected to add a trading perspective alongside the legal/executive mailboxes and increase topical diversity.
+
+whitt-m (Email count: 807): Operations. Smaller mailbox included to round out the set to five and add operational email coverage.
 
 ---
 

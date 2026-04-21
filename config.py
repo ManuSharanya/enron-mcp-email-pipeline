@@ -33,19 +33,19 @@ SEND_LOG_PATH        = os.path.join(OUTPUT_DIR, "send_log.csv")
 DUPLICATES_REPORT    = os.path.join(BASE_DIR, "duplicates_report.csv")
 
 # ── Mailbox selection (Task 1) ────────────────────────────────────────────────
-# Five mailboxes chosen for breadth and executive/functional diversity.
+# Five mailboxes chosen for demo (~25k emails total, fast extraction).
 # See README for rationale; roles in brief:
-#   kaminski-v  — VP Research (quantitative / risk)
-#   dasovich-j  — Government Affairs (regulatory)
-#   skilling-j  — CEO (executive decision-making)
 #   taylor-m    — Legal (general counsel)
 #   haedicke-m  — Legal (managing director / legal)
+#   skilling-j  — CEO (executive decision-making)
+#   buy-r       — Energy trading
+#   whitt-m     — Operations
 SELECTED_MAILBOXES = [
-    "kaminski-v",
-    "dasovich-j",
-    "skilling-j",
     "taylor-m",
     "haedicke-m",
+    "skilling-j",
+    "buy-r",
+    "whitt-m",
 ]
 
 # ── Duplicate detection (Task 3) ──────────────────────────────────────────────

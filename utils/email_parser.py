@@ -509,16 +509,16 @@ def _extract_optional(msg, body: str) -> dict:
     # These are custom headers added by Enron's mail infrastructure.
     # X-From/X-To/X-cc/X-bcc hold display names (not necessarily real addresses).
     # We store them as raw strings — no address parsing applied here.
-    record["x_from"]   = msg.get("X-From")   or None
-    record["x_to"]     = msg.get("X-To")     or None
-    record["x_cc"]     = msg.get("X-cc")     or None   # Note: lowercase "cc"
-    record["x_bcc"]    = msg.get("X-bcc")    or None   # Note: lowercase "bcc"
-    record["x_folder"] = msg.get("X-Folder") or None
-    record["x_origin"] = msg.get("X-Origin") or None
+    record["x_from"]   = _decode_header_value(msg.get("X-From"))   or None
+    record["x_to"]     = _decode_header_value(msg.get("X-To"))     or None
+    record["x_cc"]     = _decode_header_value(msg.get("X-cc"))     or None   # Note: lowercase "cc"
+    record["x_bcc"]    = _decode_header_value(msg.get("X-bcc"))    or None   # Note: lowercase "bcc"
+    record["x_folder"] = _decode_header_value(msg.get("X-Folder")) or None
+    record["x_origin"] = _decode_header_value(msg.get("X-Origin")) or None
 
     # ── content_type ───────────────────────────────────────────────────────
     # Store the raw Content-Type value (e.g. "text/plain; charset=us-ascii").
-    record["content_type"] = msg.get("Content-Type") or None
+    record["content_type"] = _decode_header_value(msg.get("Content-Type")) or None
 
     # ── has_attachment ─────────────────────────────────────────────────────
     # Inferred from MIME type and body keywords (see _infer_has_attachment).

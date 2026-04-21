@@ -31,7 +31,7 @@ Do NOT write any pipeline code yet. Just the structure.
 
 Also verify if the selected 5 mailboxes is a good selection or not.
 ```
-
+Note: initially I started with the above emailbox selection and the pipeline ran perfectly but took 30min as it has 78k files to process. For live demo purposes I changed the emailbox selection a bit.
 ---
 
 ### Example Prompts
@@ -75,7 +75,17 @@ Switched to the GongRzhe Node.js server (`@gongrzhe/server-gmail-mcp`), which st
 
 **Fix:** Uninstalled the stateless variant, installed the correct autoauth package, added Gmail address as a test user in Google Cloud Console under OAuth consent screen -> Test users.
 
-### Case 3 - False positives in duplicate notifications
+### Case 3 - Header type error silently failing 6% of emails
+
+**Issue:** When switching to a new set of mailboxes for the demo run, I noticed repeated warnings in the output: `ProgrammingError: Error binding parameter 8: type 'Header' is not supported`. 1,596 out of 26,496 files were failing silently — they were being logged as errors and skipped without being stored in the database.
+
+The bug was in `utils/email_parser.py`. The X-* headers (X-From, X-To, X-cc, X-bcc, X-Folder, X-Origin) were being passed directly from `msg.get()` to SQLite. In some emails, `msg.get()` returns an `email.header.Header` object instead of a plain string — SQLite can't bind that type, so the insert fails.
+
+**Refining the prompt:** I realised that the X-* fields were the only header fields in `_extract_optional()` not going through `_decode_header_value()`, which already existed in the file and handles the Header to string conversion. Every other header field was already using it correctly.
+
+**Fix:** So I wrapped all six X-* headers and `content_type` in `_decode_header_value()` — a one-line change per field. The function was already there but wasn't being applied consistently.
+
+### Case 4 - False positives in duplicate notifications
 
 **What went wrong:** After the first successful live run, some emails showed similarity scores of 66.9% and 84.7% in the notifications which were well below the 90% threshold. When I found this and checked, the explanation was Union-Find transitivity: if A~B (≥90%) and B~C (≥90%), Union-Find puts A, B, C in the same cluster even if A~C only scores 66.9%.
 
