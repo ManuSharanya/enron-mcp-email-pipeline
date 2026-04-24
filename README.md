@@ -61,6 +61,7 @@ python main.py
 # Full pipeline — sends live emails via MCP. Does NOT write .eml files.
 python main.py --send-live
 
+#Below commands were used for testing purposes:
 # Skip Task 1 (DB already populated) — re-runs Tasks 3 and 4 dry-run. Writes .eml files.
 python main.py --skip-extract
 
